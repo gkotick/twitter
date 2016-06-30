@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import NSDate_TimeAgo
 
 class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     var tweets: [Tweet]!
@@ -19,6 +20,7 @@ class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDa
         tableView.insertSubview(refreshControl, atIndex: 0)
         tableView.delegate = self
         tableView.dataSource = self
+        self.automaticallyAdjustsScrollViewInsets = false
         
         self.loadData()
         // Do any additional setup after loading the view.
@@ -26,14 +28,14 @@ class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func loadData(){
         TwitterClient.sharedInstance.homeTimeline({ (tweets: [Tweet]) -> () in
             self.tweets = tweets
-            for tweet in tweets {
-                print(tweet.text)
-            }
+            //            for tweet in tweets {
+            //                print(tweet.text)
+            //            }
             self.tableView.reloadData()
             }, failure: {(error: NSError) -> () in
                 print(error.localizedDescription)
         })
-
+        
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -56,16 +58,20 @@ class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDa
         let tweet = tweets[indexPath.row]
         cell.tweet = tweet
         cell.button.tag = indexPath.row
+        
+        let date = (tweet.timestamp)! as NSDate
+        let relativeTimestamp = date.dateTimeUntilNow()
+        cell.timestampLabel.text = relativeTimestamp
         return cell
     }
     func refreshControlAction(refreshControl: UIRefreshControl) {
         
-            self.loadData()
-            
-            self.tableView.reloadData()
-                                                                        
-            
-            refreshControl.endRefreshing()
+        self.loadData()
+        
+        self.tableView.reloadData()
+        
+        
+        refreshControl.endRefreshing()
         
     }
     override func
@@ -77,7 +83,7 @@ class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDa
             let tweet = tweets[indexPath!.row]
             let detailsViewController = segue.destinationViewController as! DetailsViewController
             detailsViewController.tweet = tweet
-        
+            
         } else if segue.identifier == "UserSegue"{
             
             let tweet = tweets[(sender?.tag)!]
@@ -85,9 +91,8 @@ class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDa
             let userViewController = segue.destinationViewController as! UserViewController
             userViewController.user = user
         }
-
+        
     }
-
     
     /*
      // MARK: - Navigation

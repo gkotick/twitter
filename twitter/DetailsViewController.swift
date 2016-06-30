@@ -19,7 +19,6 @@ class DetailsViewController: UIViewController {
     @IBOutlet weak var screennameLabel: UILabel!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var profileImage: UIImageView!
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         tweetLabel.text = tweet!.text as? String
@@ -34,7 +33,6 @@ class DetailsViewController: UIViewController {
         retweetCount.text = "\(tweet!.retweetCount)"
         let image = (tweet!.user?.profileUrl)! as NSURL
         
-        
         profileImage.setImageWithURL(image)
 
         // Do any additional setup after loading the view.
@@ -46,9 +44,21 @@ class DetailsViewController: UIViewController {
     }
     
     @IBAction func retweetButton(sender: AnyObject) {
+         print("before: \(tweet!.retweetCount)")
+        TwitterClient.sharedInstance.retweet(tweet!.id!, success: { (tweet: Tweet) -> Void in
+                print("sucess: \(tweet.retweetCount)")
+            }, failure: { (error: NSError) -> () in
+                print(error.localizedDescription)
+            })
     }
 
     @IBAction func favoriteButton(sender: AnyObject) {
+        print("before: \(tweet!.favoritesCount)")
+        TwitterClient.sharedInstance.favorite(tweet!.id!, success: { (tweet: Tweet) -> Void in
+            print("sucess: \(tweet.favoritesCount)")
+            }, failure: { (error: NSError) -> () in
+                print(error.localizedDescription)
+        })
     }
     /*
     // MARK: - Navigation

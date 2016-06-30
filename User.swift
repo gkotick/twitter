@@ -28,7 +28,7 @@ class User: NSObject {
         if let profileUrlString = profileUrlString {
             profileUrl = NSURL(string: profileUrlString)
         }
-        let backgroundUrlString = dictionary["profile_background_image_url_https"] as? String
+        let backgroundUrlString = dictionary["profile_banner_url"] as? String
         if let backgroundUrlString = backgroundUrlString {
             backgroundUrl = NSURL(string: backgroundUrlString)
         }
