@@ -23,7 +23,20 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var backgroundImage: UIImageView!
     
     @IBOutlet weak var screennameLabel: UILabel!
-    var username: String?
+    var username: String?{
+        didSet{
+            screennameLabel.text = "@\(username!)"
+            nameLabel.text = user?.name as? String
+            
+            let image = (user?.profileUrl)! as NSURL
+            let backimage = (user?.backgroundUrl!)! as NSURL
+            backgroundImage.setImageWithURL(backimage)
+            profileImage.setImageWithURL(image)
+            followersCount.text = "\(user!.followers!)"
+            followingCount.text = "\(user!.following!)"
+            tweetsCount.text = "\(user!.statusCount!)"
+        }
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         self.loadData()
@@ -31,36 +44,30 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         tableView.dataSource = self
         self.automaticallyAdjustsScrollViewInsets = false
         
-        screennameLabel.text = "@\(username!)"
-        nameLabel.text = user?.name as? String
-        
-        let image = (user?.profileUrl)! as NSURL
-        let backimage = (user?.backgroundUrl!)! as NSURL
-        backgroundImage.setImageWithURL(backimage)
-        profileImage.setImageWithURL(image)
-        followersCount.text = "\(user!.followers!)"
-        followingCount.text = "\(user!.following!)"
-        tweetsCount.text = "\(user!.statusCount!)"
         
         
         // Do any additional setup after loading the view.
     }
+    
     func loadData(){
         TwitterClient.sharedInstance.currentAccount( {(user: User) -> () in
             self.user = user
+            print(user)
             self.username = self.user!.screenname as? String
+            TwitterClient.sharedInstance.userTimeline(self.username!, success: {(tweets: [Tweet]) -> () in
+                self.tweets = tweets
+                
+                self.tableView.reloadData()
+                }, failure: {(error: NSError) -> () in
+                    print(error.localizedDescription)
+            })
             }, failure: {(error: NSError) -> () in
                 print(error.localizedDescription)
         })
        
-        TwitterClient.sharedInstance.userTimeline(username!, success: {(tweets: [Tweet]) -> () in
-            self.tweets = tweets
-            
-            self.tableView.reloadData()
-            }, failure: {(error: NSError) -> () in
-                print(error.localizedDescription)
-        })
+        
     }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -69,10 +76,13 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         return tweets?.count ?? 0
     }
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("UserCell", forIndexPath: indexPath) as! UserTableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("ProfileCell", forIndexPath: indexPath) as! ProfileTableViewCell
         let tweet = tweets[indexPath.row]
         cell.tweet = tweet
-        cell.button.tag = indexPath.row
+        
+        let date = (tweet.timestamp)! as NSDate
+        let relativeTimestamp = date.dateTimeUntilNow()
+        cell.timestampLabel.text = relativeTimestamp
         return cell
         
     }

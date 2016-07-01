@@ -89,6 +89,21 @@ class TwitterClient: BDBOAuth1SessionManager {
         })
 
     }
+    //edit here!!!!!!!!!!!!!!
+    func currentUserLikes(screenname: String, success: ([Tweet]) -> (), failure: (NSError) -> ()){
+        GET("1.1/favorites/list.json?screen_name=\(screenname)", parameters: nil, progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) -> Void in
+            
+            let dictionaries = response as! [NSDictionary]
+            let tweets = Tweet.tweetsWithArray(dictionaries)
+            
+            success(tweets)
+            
+            }, failure:  { (task: NSURLSessionDataTask?, error: NSError) -> Void in
+                failure(error)
+        })
+        
+    }
+
     func login(success: () -> (), failure: (NSError) -> ()){
         loginSuccess = success
         loginFailure = failure

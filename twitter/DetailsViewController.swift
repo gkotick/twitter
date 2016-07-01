@@ -22,7 +22,7 @@ class DetailsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tweetLabel.text = tweet!.text as? String
-        timestampLabel.text = "\(tweet!.timestamp!)"
+        //timestampLabel.text = "\(tweet!.timestamp!)"
         
         tweetLabel.sizeToFit()
         let username = tweet!.user?.screenname as? String
@@ -32,7 +32,9 @@ class DetailsViewController: UIViewController {
         favoritesCount.text = "\(tweet!.favoritesCount)"
         retweetCount.text = "\(tweet!.retweetCount)"
         let image = (tweet!.user?.profileUrl)! as NSURL
-        
+        let date = (tweet!.timestamp)! as NSDate
+        let relativeTimestamp = date.dateTimeUntilNow()
+        timestampLabel.text = relativeTimestamp
         profileImage.setImageWithURL(image)
 
         // Do any additional setup after loading the view.

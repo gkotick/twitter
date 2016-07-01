@@ -26,8 +26,10 @@ class User: NSObject {
         screenname = dictionary["screen_name"] as? String
         let profileUrlString = dictionary["profile_image_url_https"] as? String
         if let profileUrlString = profileUrlString {
-            profileUrl = NSURL(string: profileUrlString)
+            let modifiedProfileUrlString = profileUrlString.stringByReplacingOccurrencesOfString("_normal", withString: "_bigger")
+            profileUrl = NSURL(string: modifiedProfileUrlString)
         }
+        
         let backgroundUrlString = dictionary["profile_banner_url"] as? String
         if let backgroundUrlString = backgroundUrlString {
             backgroundUrl = NSURL(string: backgroundUrlString)
@@ -62,6 +64,7 @@ class User: NSObject {
             let defaults = NSUserDefaults.standardUserDefaults()
             
             if let user = user{
+                
                 let data = try! NSJSONSerialization.dataWithJSONObject(user.dictionary!, options: [])
                 defaults.setObject(data, forKey: "currentUserData")
             } else{

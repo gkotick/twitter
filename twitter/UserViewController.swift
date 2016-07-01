@@ -11,6 +11,10 @@ import UIKit
 class UserViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     var user: User?
     var tweets: [Tweet]!
+    var liketweets: [Tweet]!
+
+    @IBOutlet weak var likeTableView: UITableView!
+    @IBOutlet weak var segmentedControl: UISegmentedControl!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var followersCount: UILabel!
     @IBOutlet weak var followingCount: UILabel!
@@ -26,11 +30,12 @@ class UserViewController: UIViewController, UITableViewDelegate, UITableViewData
         username = user?.screenname as? String
         tableView.delegate = self
         tableView.dataSource = self
-        self.automaticallyAdjustsScrollViewInsets = false
-
+        likeTableView.delegate = self
+        likeTableView.dataSource = self
+        tableView.hidden = false
         screennameLabel.text = "@\(username!)"
         nameLabel.text = user?.name as? String
-        
+        likeTableView.hidden = true
         let image = (user?.profileUrl)! as NSURL
         let backimage = (user?.backgroundUrl!)! as NSURL
         backgroundImage.setImageWithURL(backimage)
@@ -40,34 +45,84 @@ class UserViewController: UIViewController, UITableViewDelegate, UITableViewData
         tweetCount.text = "\(user!.statusCount!)"
 
         self.loadData()
+        self.loadLikeData()
         // Do any additional setup after loading the view.
     }
     func loadData(){
         
         TwitterClient.sharedInstance.userTimeline(username!, success: {(tweets: [Tweet]) -> () in
             self.tweets = tweets
-            for tweet in tweets{
-                print(tweet.text)
-            }
+
             self.tableView.reloadData()
             }, failure: {(error: NSError) -> () in
                 print(error.localizedDescription)
         })
         
     }
+    func loadLikeData(){
+        TwitterClient.sharedInstance.currentUserLikes(username!, success: {(tweets: [Tweet]) -> () in
+            self.liketweets = tweets
+            for tweet in self.liketweets{
+                print(tweet.text)
+            }
+            self.likeTableView.reloadData()
+
+            }, failure: {(error: NSError) -> () in
+                print(error.localizedDescription)
+        })
+    }
+    
+    @IBAction func indexChanged(sender: AnyObject) {
+        
+            switch segmentedControl.selectedSegmentIndex {
+            case 0:
+                tableView.hidden = false
+                likeTableView.hidden = true
+            case 1:
+                tableView.hidden = true
+                likeTableView.hidden = false
+            default:
+                break;
+            }
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tweets?.count ?? 0
+        if tableView == self.tableView{
+            return tweets?.count ?? 0
+
+        } else {
+            return liketweets?.count ?? 0
+        }
     }
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("UserCell", forIndexPath: indexPath) as! UserTableViewCell
-        let tweet = tweets[indexPath.row]
-        cell.tweet = tweet
-        cell.button.tag = indexPath.row
-        return cell
+        
+        if tableView == self.tableView{
+            let cell = self.tableView.dequeueReusableCellWithIdentifier("UserCell", forIndexPath: indexPath) as! UserTableViewCell
+            
+            let tweet = self.tweets[indexPath.row]
+            cell.tweet = tweet
+            cell.button.tag = indexPath.row
+            
+            let date = (tweet.timestamp)! as NSDate
+            let relativeTimestamp = date.dateTimeUntilNow()
+            cell.timestampLabel.text = relativeTimestamp
+            return cell
+        } else {
+            let cell = self.likeTableView.dequeueReusableCellWithIdentifier("LikeCell", forIndexPath: indexPath) as! LikeTableViewCell
+            
+            let tweet = self.liketweets[indexPath.row]
+            cell.tweet = tweet
+            
+            let date = (tweet.timestamp)! as NSDate
+            let relativeTimestamp = date.dateTimeUntilNow()
+            cell.timestampLabel.text = relativeTimestamp
+            return cell
+
+        }
+        
 
     }
     /*

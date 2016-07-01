@@ -1,23 +1,22 @@
 //
-//  UserTableViewCell.swift
+//  LikeTableViewCell.swift
 //  twitter
 //
-//  Created by Grace Kotick on 6/29/16.
+//  Created by Grace Kotick on 6/30/16.
 //  Copyright © 2016 Grace Kotick. All rights reserved.
 //
 
 import UIKit
 
-class UserTableViewCell: UITableViewCell {
-
-    var tweet: Tweet? {
-        didSet {
+class LikeTableViewCell: UITableViewCell {
+    var tweet: Tweet?{
+        didSet{
             tweetLabel.text = tweet!.text as? String
             
             tweetLabel.sizeToFit()
             let username = tweet!.user?.screenname as? String
             
-            screennameLabel.text = "@\(username!)"
+            usernameLabel.text = "@\(username!)"
             nameLabel.text = tweet?.user?.name as? String
             favoriteCount.text = "\(tweet!.favoritesCount)"
             retweetCount.text = "\(tweet!.retweetCount)"
@@ -25,23 +24,14 @@ class UserTableViewCell: UITableViewCell {
             
             
             profileImage.setImageWithURL(image)
-            
-            
-            
-            
-            
         }
-        
     }
-    
-    @IBOutlet weak var button: UIButton!
+    @IBOutlet weak var retweetCount: UILabel!
+    @IBOutlet weak var favoriteCount: UILabel!
+    @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var timestampLabel: UILabel!
     @IBOutlet weak var tweetLabel: UILabel!
-    @IBOutlet weak var screennameLabel: UILabel!
     @IBOutlet weak var nameLabel: UILabel!
-    @IBOutlet weak var favoriteCount: UILabel!
-    @IBOutlet weak var retweetCount: UILabel!
-    
     @IBOutlet weak var profileImage: UIImageView!
     override func awakeFromNib() {
         super.awakeFromNib()
