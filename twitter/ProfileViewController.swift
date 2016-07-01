@@ -11,6 +11,10 @@ import UIKit
 class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     var user: User?
     var tweets: [Tweet]!
+    var liketweets: [Tweet]!
+    
+    @IBOutlet weak var segmentedControl: UISegmentedControl!
+    @IBOutlet weak var likeTableView: UITableView!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var followersCount: UILabel!
     @IBOutlet weak var followingCount: UILabel!
@@ -27,7 +31,11 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         didSet{
             screennameLabel.text = "@\(username!)"
             nameLabel.text = user?.name as? String
-            
+            likeTableView.delegate = self
+            likeTableView.dataSource = self
+            likeTableView.hidden = true
+
+            tableView.hidden = false
             let image = (user?.profileUrl)! as NSURL
             let backimage = (user?.backgroundUrl!)! as NSURL
             backgroundImage.setImageWithURL(backimage)
@@ -35,6 +43,7 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
             followersCount.text = "\(user!.followers!)"
             followingCount.text = "\(user!.following!)"
             tweetsCount.text = "\(user!.statusCount!)"
+            self.loadLikeData()
         }
     }
     override func viewDidLoad() {
@@ -48,7 +57,16 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         // Do any additional setup after loading the view.
     }
-    
+    func loadLikeData(){
+        TwitterClient.sharedInstance.currentUserLikes(username!, success: {(tweets: [Tweet]) -> () in
+            self.liketweets = tweets
+            
+            self.likeTableView.reloadData()
+            
+            }, failure: {(error: NSError) -> () in
+                print(error.localizedDescription)
+        })
+    }
     func loadData(){
         TwitterClient.sharedInstance.currentAccount( {(user: User) -> () in
             self.user = user
@@ -68,14 +86,33 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         
     }
     
+    @IBAction func indexChanged(sender: AnyObject) {
+        
+        switch segmentedControl.selectedSegmentIndex {
+        case 0:
+            tableView.hidden = false
+            likeTableView.hidden = true
+        case 1:
+            tableView.hidden = true
+            likeTableView.hidden = false
+        default:
+            break;
+        }
+
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tweets?.count ?? 0
-    }
+        if tableView == self.tableView{
+            return tweets?.count ?? 0
+            
+        } else {
+            return liketweets?.count ?? 0
+        }    }
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        if tableView == self.tableView{
         let cell = tableView.dequeueReusableCellWithIdentifier("ProfileCell", forIndexPath: indexPath) as! ProfileTableViewCell
         let tweet = tweets[indexPath.row]
         cell.tweet = tweet
@@ -84,6 +121,17 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         let relativeTimestamp = date.dateTimeUntilNow()
         cell.timestampLabel.text = relativeTimestamp
         return cell
+        } else{
+            let cell = self.likeTableView.dequeueReusableCellWithIdentifier("ProfileCell2", forIndexPath: indexPath) as! ProfileTableViewCell
+            
+            let tweet = self.liketweets[indexPath.row]
+            cell.tweet = tweet
+            
+            let date = (tweet.timestamp)! as NSDate
+            let relativeTimestamp = date.dateTimeUntilNow()
+            cell.timestampLabel.text = relativeTimestamp
+            return cell
+        }
         
     }
 
