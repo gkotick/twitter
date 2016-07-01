@@ -125,6 +125,22 @@ class UserViewController: UIViewController, UITableViewDelegate, UITableViewData
         
 
     }
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "UserTweetSegue"{
+            let cell = sender as! UITableViewCell
+            let indexPath = tableView.indexPathForCell(cell)
+            let tweet = tweets[indexPath!.row]
+            let detailsViewController = segue.destinationViewController as! DetailsViewController
+            detailsViewController.tweet = tweet
+        }
+        else{
+            let cell = sender as! UITableViewCell
+            let indexPath = likeTableView.indexPathForCell(cell)
+            let tweet = liketweets[indexPath!.row]
+            let detailsViewController = segue.destinationViewController as! DetailsViewController
+            detailsViewController.tweet = tweet
+        }
+    }
     /*
     // MARK: - Navigation
 

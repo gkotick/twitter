@@ -62,6 +62,10 @@ class DetailsViewController: UIViewController {
                 print(error.localizedDescription)
         })
     }
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        let userViewController = segue.destinationViewController as! UserViewController
+        userViewController.user = tweet?.user
+    }
     /*
     // MARK: - Navigation
 
